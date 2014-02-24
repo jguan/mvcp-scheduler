@@ -1,0 +1,52 @@
+Scheduling tool for MVCP to manage recordings
+===============
+
+MVCP is a protocol for controlling video servers (see mvcp.pdf). ArdMSBSim is a Windows application that
+emulates a video server using MVCP. In order to play a file, a connection is done to a port and ASCII text
+commands are entered. An example is shown below. Start by executing the application ArdMSBSim in a command
+window.
+
+Now, you can try to record by writing telnet localhost 5250 in a separate command window:
+UADD 10101		← returns a recording unit
+LOAD U1 myfile	← load a unit with a file
+CUER U1			← prepares the unit for recording
+REC U1			← the file is recorded
+STOP U1			← stop the recording
+UNLD U1			← unloads the unit (file)
+UCLS U1			← closes the unit
+
+It is possible to have several connections to the same video server open at the same time. Try again, but this time
+with an additional telnet session. Type MON in the new window. To simulate multiple video servers, you may start
+multiple instances of ArdMSBSim, using different port numbers. –h shows the syntax help for ArdMSBSim.
+
+This program aims to manage recordings. IT will listen to a port and translate
+commands from the user to MVCP commands. In addition, the program will read a description file that contains the
+names of the video servers and where they are found. An example of such a description file is shown below. It
+contains the name of the video server, its IP address and its port:
+
+prancen 127.0.0.1 5250
+vixen 127.0.0.1 5251
+comet 192.168.1.12 5250
+
+This program will take two arguments – the path of the description file and the port number that the program listens
+on. The commands to the port of the program have the following syntax:
+
+RECORD priority server filename time
+
+where server is the name in the description file, filename is the file that should be recorded (see LOAD) and time is
+the length of the recording (in seconds). Priority is an integer 0-100, 100 is the highest. Example:
+
+RECORD 10 vixen myfile 40
+
+The time is the time between the REC and STOP commands to the video server. A video server can only record one
+file at a time. Multiple recording requests from the user to the video server must be queued and executed in order,
+first by priority, second by the time the request was issued. This program only needs to handle one command connection
+at a time. With the example description file above, the communication would look like this:
+
+                                            +---------+
+                                       +--->| prancen |
+   +--------+     +----------------+   |    +---------+
+   | telnet |+--->| MVCP scheduler |+--+
+   +--------+     +----------------+   |    +---------+
+                                       +--->|  comet  |
+                                            +---------+
