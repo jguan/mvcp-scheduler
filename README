@@ -19,7 +19,7 @@ It is possible to have several connections to the same video server open at the 
 with an additional telnet session. Type MON in the new window. To simulate multiple video servers, you may start
 multiple instances of ArdMSBSim, using different port numbers. –h shows the syntax help for ArdMSBSim.
 
-This program aims to manage recordings. IT will listen to a port and translate
+This program using Perl POE module aims to manage recordings. It will listen to a port and translate
 commands from the user to MVCP commands. In addition, the program will read a description file that contains the
 names of the video servers and where they are found. An example of such a description file is shown below. It
 contains the name of the video server, its IP address and its port:
